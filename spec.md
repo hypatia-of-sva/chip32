@@ -32,17 +32,23 @@ This copies the value of Rm to Rn while copying the old value of Rn to Rl. If l 
 
 #### Load/Store (op = 1)
 LDST Rn, Rm, Rl:
+
 	if (Rl != 0) x = Rl*; if (Rm != 0) Rm* = Rn; if(Rl != 0) Rn = x;
+ 
 This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after.
 
 #### Load lower from immediate (op = 3)
 LDLI Rn, imm
+
 	Rn &= 0xFF00; Rn |= imm;
+ 
 This sets the lower 16 bits of Rn to the immediate value, interpreted as a 16-bit unsigned integer.
 
 #### Load upper from immediate (op = 4)
 LDUI Rn, imm
+
 	Rn &= 0x00FF; Rn |= (imm << 16);
+ 
 This sets the upper 16 bits of Rn to the immediate value, interpreted as a 16-bit unsigned integer.
 
 #### op codes 5 to 15 are reserved for future use.
@@ -51,12 +57,16 @@ This sets the upper 16 bits of Rn to the immediate value, interpreted as a 16-bi
 
 #### Addition (op = 16)
 ADD Rn, Rm, Rl: 
+
 	Rn = Rm + Rl;
+ 
 Adds two registers and saves the sum to a third in integer format. Uniform for signed and unsigned integers. Wraps around 2^32. Wrapping sets the carry flag.
 
 #### Addition with carry (op = 17)
 ADC Rn, Rm, Rl:
+
 	Rn = Rm + Rl + carry
+ 
 Adds two registers and the carry flag and saves the sum to a third register in integer format. Uniform for signed and unsigned integers. Wrapping behavior is the same as for the sequence of instructions:
 	ADD Rn, Rm, Rl
 	ADD Rn, Rn, carry
@@ -64,97 +74,135 @@ where carry is either 0 or 1 depending if the carry flag is set.
 
 #### Subtraction (op = 18)
 SUB Rn, Rm, Rl:
+
 	Rn = Rm - Rl
+ 
 Substracts two registers and saves the difference to a third in integer format. Uniform for signed and unsigned integers. Wrapping behavior is the same as for ADD when summing the values of Rm and of (2^32 - Rl), which is the same as the bit inverse of Rl plus 1. It acts therefore exactly as if executing
+
 	NAND Rk, Rl, Rl
 	ADDI Rk, #1
 	ADD Rn, Rm, Rk
+ 
 for any temporary register Rk, but without actually changing any register except Rn. Wrapping sets the borrow flag.
 
 #### Subtraction with borrow (op = 19)
 SBB Rn, Rm, Rl:
+
 	Rn = Rm - Rl - borrow
+ 
 Subtracts two registers and from that the borrow flag and saves the result to a third register in integer format. Uniform for signed and unsigned integers. Wrapping behavior is the same as for the sequence of instructions:
+
 	SUB Rn, Rm, Rl
 	SUB Rn, Rn, borrow
+ 
 where borrow is either 0 or 1 depending if the borrow flag is set.
 
 #### Multiplication (op = 20)
 MUL Rn, Rm, Rl:
+
 	Rn = Rm * Rl
+ 
 Multiplies two registers and saves the product to a third in integer format. Uniform for signed and unsigned integers. Wraps around 3^32. The calculation performed is the unsigned calculation, which is equivalent to the signed calculation due to (2^32-k)(2^32-l) ^= kl mod 2^32 and k(2^32 - l) ^= 2^32-kl mod 2^32. Wrapping sets the overflow flag.
 
 #### Unsigned Division (op = 21)
 UDIV Rn, Rm, Rl
+
 	Rn = Rm / Rl
+ 
 Divides two registers and saves the whole number part of the quotient to a third in unsigned integer format. Both operands are taken as unsigned integers, hence the quotient is always positive and the whole number part, as less than Rm, always representable. If Rl == 0, Rn remains unchanged, and the divide-by-zero flag is set.
 
 #### Signed Division (op = 22)
 SDIV Rn, Rm, Rl
+
 	Rn = Rm / Rl
+ 
 Functions exactly as UDIV, including divide-by-zero flag, except that the operand are taken as signed integers, so the result is also stored as a signed integer.
 
 #### Modulo (op = 23)
 MOD Rn, Rm, Rl
+
 	Rn = Rm % Rl
+ 
 Takes the remainder of the quotient Rm / Rl, where both operands are interpreted to be unsigned integers, and stores it into a third register. The result will always be between 0 and Rl - 1. If Rl == 0, Rn remains unchanged and the divide-by-zero flag is set.
 
 #### Bit-wise and (op = 24)
 AND Rn, Rm, Rl
+
 	Rn = Rm & Rl
+ 
 Performs a bit-wise-and on two registers and saves the result in a third. Uniform for signed and unsigned integers. Flags are unchanged.
 
 #### Bit-wise or (op = 25)
 OR Rn, Rm, Rl
+
 	Rn = Rm | Rl
+ 
 Performs a bit-wise-or on two registers and saves the result in a third. Uniform for signed and unsigned integers. Flags are unchanged.
 
 #### Bit-wise exclusive or (op = 26)
 XOR Rn, Rm, Rl
+
 	Rn = Rm ^ Rl
+ 
 Performs a bit-wise-exclusive-or on two registers and saves the result in a third. Uniform for signed and unsigned integers. Flags are unchanged.
 
 #### Bit-wise nand (op = 27)
 NAND Rn, Rm, Rl
+
 	Rn = ~(Rm & Rl)
+ 
 Performs a bit-wise-nand on two registers and saves the result in a third. Uniform for signed and unsigned integers. Flags are unchanged.
 
 #### Logical nand (op = 28)
 LNAND Rn, Rm, Rl
+
 	Rn = !(Rm && Rl)
+ 
 Performs a logical nand on two registers and saves the result in a third. The result is either 0 or 1. Uniform for signed and unsigned integers. Flags are unchanged.
 
 #### Left-shift (op = 29)
 LSH Rn, Rm, Rl
+
 	Rn = (Rm << Rl)
+ 
 Performs a left-shift of one register by the number of bit-positions indicated in another, and saves the result in a third. Uniform for signed and unsignde integers, effectively calculating the result with all registers treated as unsigned integers. If the value of Rl is greater than 31, the overflow flag is set. Vacated bit-positions are filled with 0.
 
 #### Unsigned right-shift (op = 30)
 URSH Rn, Rm, Rl
+
 	Rn = (Rm >> Rl)
+ 
 Performs a right-shift of one register by the number of bit-positions indicated in another, and saves the result in a third, treating all registers as unsigned integers. If the value of Rl is greater than 31. the underflow flag is set. Vacted bit-positions are filled with 0.
 
 #### Signed right-shift (op = 31)
 SRSH Rn, Rm, Rl
+
 	Rn = (Rm >> Rl)
+ 
 Performs a right-shift of one register by the number of bit-positions indicated in another, and saves the result in a third, treating the the value shifted as a signed integer, the number of bit positions as an unsigned integer, and the result as a signed integer. If the value of Rl is greater than 31. the underflow flag is set. Vacted bit-positions are filled with the highest big, or sign-bit, of the original value that is being shifted.
 
 #### Unsigned greater-than (op = 32)
 UGT Rn, Rm, Rl
+
 	if(Rm > Rl) Rn = 1;
 	if(Rm <= Rl) Rn = 0;
+ 
 Compares two registers as unsigned integers. Stores the result of a strict greater-than check in a third register. Also sets, depending on the relation between the two values, the equal, less than, or greater than flag. The value 1 is used so that multiplying with the result conditionally zeroes another value, so that comparisons can be used in arithmetic.
 
 #### Signed greater-than (op = 33)
 SGT Rn, Rm, Rl
+
 	if(Rm > Rl) Rn = 1;
 	if(Rm <= Rl) Rn = 0;
+ 
 Compares two registers as signed integers. Stores the result of a strict greater-than check in a third register. Also sets, depending on the relation between the two values, the equal, less than, or greater than flag.
 
 #### Equality comparison (op = 34)
 EQ Rn, Rm, Rl
+
 	if(Rm == Rl) Rn = 1;
 	if(Rm != Rl) Rn = 0;
+ 
 Compares two registers for equality. Stores the result in a third register. Does set the equal flag, but no other.
 
 
@@ -162,10 +210,14 @@ The following integer operations take immediate values. They are all to be treat
 
 #### Addition with an immediate (op = 35)
 ADDI Rn, imm:
+
 	Rn += se(imm)
+ 
 Works exactly like
+
 	temp = se(imm)
 	ADD Rn, Rn, temp
+ 
 would, including all necessary flag changes.
 
 
@@ -223,24 +275,32 @@ EQI Rn, imm
 There is no NANDI, because that would be the same as ORI with a bit-inverted immediate, and no LNANDI becsuse the operation, depending if the immediate is 0 or not, would be equivalent to either LNAND Rm, Rm, Rm or to EQ Rm, Rm, Rm.
 
 Importantly, signedness of the operation does matter even though the immediate is always sign-extended. UGTI and SGTI act differently, because they treat the register as either signed or unsigned, and therefore, say if R5 has stored the value 0xFFFFF00, the operations
+
 	UGTI R5, #17
 	SGTI R5, #17
+ 
 have opposite results, because the first instruction interprets R5 as a large positive integer, thus writing 1 to R5, while the second reads it as a negative integer, thus writing 0 to R5.
 
 Also we add the following two immediate instructions:
 
 #### Unsigned less-than with an immediate (op = 52)
 ULTI Rn, imm:
+
 Works exactly like
+
 	temp = se(imm)
 	UGT Rn, temp, Rn
+ 
 would, including all necessary flag changes.
 
 #### Signed less-than with an immediate (op = 53)
 SLTI Rn, imm:
+
 Works exactly like
+
 	temp = se(imm)
 	SGT Rn, temp, Rn
+ 
 would, including all necessary flag changes.
 
 
@@ -251,70 +311,96 @@ would, including all necessary flag changes.
 
 #### Floating-point addition (op = 80)
 FADD Rn, Rm, Rl	
+
 	Rn = Rm + Rl
+ 
 Computes the floating-point addition of two registers according to IEEE single-precision and stores it in a third.
 
 #### Floating-point subtraction (op = 81)
 FSUB Rn, Rm, Rl
+
 	Rn = Rm - Rl
+ 
 Computes the floating-point subtraction of two registers according to IEEE single-precision and stores it in a third.
 
 #### Floating-point multiplication (op = 82)
 FMUL Rn, Rm, Rl
+
 	Rn = Rm * Rl
+ 
 Computes the floating-point multiplication of two registers according to IEEE single-precision and stores it in a third.
 
 #### Floating-point divison (op = 83)
 FDIV Rn, Rm, Rl
+
 	Rn = Rm / Rl
+ 
 Computes the floating-point division of two registers according to IEEE single-precision and stores it in a third.
 
 #### Floating-point modulo (op = 84)
 FMOD Rn, Rm, Rl
+
 	Rn = Rm % Rl
+ 
 Computes the floating-point modulo of two registers and stroes it into a third. This means, that the result is the same as the value Rm - k * Rl for a (positive or negative) integer k, such that the result has the same sign as Rm and is closer to zero than Rl. If Rl == 0, a floating-point divide-by-zero error is set. If any of the arguments are NaN or infinity, a floating-point error is set.
 
 #### Floating-point exponentiation (op = 85)
 FEXP Rn, Rm, Rl
+
 	Rn = Rm ** Rl
+ 
 Computes the floating-point exponentiation of two registers and stores it in a third. For Rl == 0.5f, the result is calculated according to the IEEE sqrt-operation, performed on the value of Rm. Otherwise: If Rm < 0 and Rl is not a whole number, or if Rm == 0 and Rl <= 0, or if any of the arguments are NaN or infinity, a floating-point error is set. If the result is not representable due to size, Rn will be set to +infinity or -infinity depending on the sign of the actual result. If the result is not representable due to being to close to zero, Rn will be set to +0 or -0 depending on the actual result, and the underflow-flag will be set.
 
 #### Floating-point logarithm (op = 86)
 FLOG Rn, Rm, Rl
+
 	Rn = log Rl (Rm)
+ 
 Computes the logarithm to the base of the value of one register of another, both interpreted as floating-point numbers, and stores it in a third. If Rm <= 0, or if any of the arguments are NaN or infinity, a floating-point error is set. If the result is not representable due to size, Rn will be set to +infinity or -infinity depending on the sign of the actual result. If the result is not representable due to being to close to zero, Rn will be set to +0 or -0 depending on the actual result, and the underflow-flag will be set. 
 
 #### Floating-point sine (op = 87)
 FSIN Rn, Rm, Rl
+
 	Rn = Rl * sin (Rm)
+ 
 Computes the product of one register with the sine of another and stores it to a third. If any of the arguments are NaN or infinity, a floating-point error is set. If the result is not representable due to being to close to zero, Rn will be set to +0 or -0 depending on the actual result, and the underflow-flag will be set.
 
 #### Floating-point inverse sine (op = 88)
 FASIN Rn, Rm, Rl
+
 	Rn = arcsin(Rm / Rl)
+ 
 Calculates the principal value of the inverse sine of one register divided by another and stores it to a third. If Rl == 0, a divide-by-zero floating-point error is set. If the value of the quotient is not in the range from -1 to +1, or if any of the arguments are NaN or infinity, a floating point error is set. If the result is not representable due to being to close to zero, Rn will be set to +0 or -0 depending on the actual result, and the underflow-flag will be set.
 
 #### Floating-point greater-than (op = 89)
 FGT Rn, Rm, Rl
+
 	if(Rm > Rl) Rn = 1;
 	if(Rm <= Rl) Rn = 0;
+ 
 Compares two registers as single precision floats. Stores the result of a strict greater-than check in a third register. Also sets, depending on the relation between the two values, the equal, less than, or greater than flag. If any of the arguments are NaN, a floating point error is set.
 
 #### Floating-point equality comparison (op = 90)
 FEQ Rn, Rm, Rl
+
 	if(Rm == Rl) Rn = 1;
 	if(Rm != Rl) Rn = 0;
+ 
 Compares two registers for equality as floating point numbers. Stores the result in a third register. Does set the equal flag, but not the less than or greater than flag. NaNs are the only values that compare unequal to themselves (however, they do compare equal to themselves under the EQ instruction; this is important e.g. to implement functions like fpclassify or isnan).
 
 #### Convert integer into floating-point number (op = 91)
 I2F Rn, Rm, Rl
+
 	Rn = Rm * (2**Rl)
+ 
 Takes two registers as significand and exponent of a new floating point number, which is then shifted to the corrext exponent for significance, reduced of the leading 1, and stored into a third register. If the result is not representable due to being to close to zero, Rn will be set to +0 or -0 depending on the actual result, and the underflow-flag will be set.
 
 #### Round floating-point number to integer (op = 92)
 F2I Rn, Rm, Rl
+
 	Rn = round(Rl)
 	Rm = Rl - round(Rl)
+ 
 Rounds one register according to the current rounding mode (stored in a flag at a special address), and stores the result and the remainder into two other registers. If any of the arguments are NaN or infinities, a floating point error is set. If the result is not representable due to size, Rn will not be set and the overflow flag will be set; however, Rm will still be set. The original value Rl and the remainder Rm are here treated as a floating-point registers, while Rn is treated as a signed integer register.
 
 
@@ -323,10 +409,14 @@ The following floating-point operations take immediate values. They are all to b
 
 #### Floating-point addition with an immediate (op = 93)
 FADDI Rn, imm:
+
 	Rn += ex(imm)
+ 
 Works exactly like
+
 	temp = ex(imm)
 	FADD Rn, Rn, temp
+ 
 would, including all necessary flag changes.
 
 
@@ -368,24 +458,33 @@ Also we add the following immediate instructions:
 
 #### Floating-point less-than with an immediate (op = 104)
 FLTI Rn, imm:
+
 Works exactly like
+
 	temp = ex(imm)
 	FGT Rn, temp, Rn
+ 
 would, including all necessary flag changes.
 
 
 #### Convert immediate integer into floating-point number (op = 105)
 II2F Rn, imm
+
 Works exactly like:
+
 	temp = se(imm)
 	I2F Rn, temp, 1
+ 
 would, including all necessary flag changes.
 
 #### Round immediate floating-point number to integer (op = 106)
 IF2I Rn, imm
+
 Works exactly like	
+
 	temp = ex(imm)
 	F2I Rn, ignore, temp
+ 
 would, including all necessary flag changes.
 
 
@@ -398,12 +497,16 @@ would, including all necessary flag changes.
 
 #### Branch if zero (op = 121)
 BZ Rn, imm
+
 	if(Rn == 0) PC += se(imm);
+ 
 Adds an offset to the program counter, if a register is zero. This offset is interpreted as a 16-bit signed integer, thus sign extended, so this instruction can jump backwards and forwards 32k instructions.
 
 #### Interrupt invocation (op = 122)
 INT Rn, imm
+
 	(interrupt_table[Rn])(imm)
+ 
 Invokes the interrupt with the number of the value in Rn, with some immediate value as payload. How this payload is to be interpreted - whether as numbers, addresses to certain pages, or as two register numbers, or in other ways - is up to the interrupt handler / built-in functionality, and documented there. These interrupts can be hardware functionality (like making a controller rumble), a chip32 system functionality (like saving savegames) or a user supplied interrupt handler (like shader code for draw calls). The instruction can take an indeterminate amount of time and may or may not return immediately while the task is completed asynchronously in the background (for example, saving should happen immediately and be blocking, but draw calls, as they are potentially executed on an external GPU, will be executed asynchronously).
 
 #### op codes 123 to 255 are reserved for future use
