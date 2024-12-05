@@ -36,7 +36,9 @@ This copies the value of Rm to Rn while copying the old value of Rn to Rl. If l 
 #### Load/Store (op = 1)
 LDST Rn, Rm, Rl:
 
-	if (Rl != 0) x = Rl*; if (Rm != 0) Rm* = Rn; if(Rl != 0) Rn = x;
+	if (Rl != 0) x = Rl*;
+ 	if (Rm != 0) Rm* = Rn;
+  	if(Rl != 0) Rn = x;
  
 This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after.
 
