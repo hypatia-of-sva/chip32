@@ -25,7 +25,9 @@ The currently supported instructions are split in the following sections, each e
 
 #### Copy/Swap (op = 0)
 CPSWP Rn, Rm, Rl:
+
 	x = Rm; Rl = Rn; Rn = x;
+ 
 This copies the value of Rm to Rn while copying the old value of Rn to Rl. If l == n, this is a copy from Rm to Rn; if l == m, this is a swap of Rm and Rn.
 
 #### Load/Store (op = 1)
@@ -392,7 +394,7 @@ would, including all necessary flag changes.
 
 
 
-### 4. Control-flow instructions
+### 4. Control-flow instructions and miscelaneous
 
 #### Branch if zero (op = 121)
 BZ Rn, imm
@@ -404,6 +406,7 @@ INT Rn, imm
 	(interrupt_table[Rn])(imm)
 Invokes the interrupt with the number of the value in Rn, with some immediate value as payload. How this payload is to be interpreted - whether as numbers, addresses to certain pages, or as two register numbers, or in other ways - is up to the interrupt handler / built-in functionality, and documented there. These interrupts can be hardware functionality (like making a controller rumble), a chip32 system functionality (like saving savegames) or a user supplied interrupt handler (like shader code for draw calls). The instruction can take an indeterminate amount of time and may or may not return immediately while the task is completed asynchronously in the background (for example, saving should happen immediately and be blocking, but draw calls, as they are potentially executed on an external GPU, will be executed asynchronously).
 
+#### op codes 123 to 255 are reserved for future use
 
 ### Conclusion
 
