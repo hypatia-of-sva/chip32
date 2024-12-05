@@ -3,6 +3,7 @@
 ## Overview
 
 Chip32 is a 32-bit Computer in the following senses:
+
 	a) all registers are 32-bit, being usable for either 32-bit integer (signed and unsigned) or 32-bit IEEE floating point numbers (binary32), or for pointers.
 	b) pointers are 32-bit, that is, there are 2^32 = 4 billion addresses
 	c) data cells are 32-bit, that is, behind each address lie 4 bytes, so that the whole address space represents 4bytesx4billion= 16 GB.
@@ -13,8 +14,10 @@ There are 255 general-purpose registers with ids 0 to 254, and the program count
 There are also a number of flags, that are usable by special instructions; they are memory mapped, along with other important internal data, onto the last 256KB of memory, i.e. addresses with the upper 16 bits all 1. This area of memory is not usable as normal storage; writing and reading to it is handled specially, and trying to jump into this area will end the execution of the program, which is also used as the way of exiting program execution normally. The number and location of these flags and other memory-mapped data will be explained later on.
 
 The representation of instructions in binary always has one of two forms:
+
 a)   opcode | Rn | imm
 b)   opcode | Rn |  Rm | Rl
+
 opcodes are 8-bit, registers (Rn, Rm, Rl) also 8-bit, immediate values (imm) 16-bit. Not all opcodes are currently used, some are reserved for future use, including possibly multi-cell instructions that could have a different structure. However, the first 8 bits will always be used to represent the op code. In this representation, the first bit is the most significand (i.e. opcodes use the bits with values 2^31 to 2^28).
 
 The currently supported instructions are split in the following sections, each explained with a pseudo-micro-code segment and a written out explanation:
