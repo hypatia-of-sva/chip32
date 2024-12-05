@@ -4,10 +4,10 @@
 
 Chip32 is a 32-bit Computer in the following senses:
 
-	a) all registers are 32-bit, being usable for either 32-bit integer (signed and unsigned) or 32-bit IEEE floating point numbers (binary32), or for pointers.
-	b) pointers are 32-bit, that is, there are 2^32 = 4 billion addresses
-	c) data cells are 32-bit, that is, behind each address lie 4 bytes, so that the whole address space represents 4bytesx4billion= 16 GB.
-	d) all current instructions are a single cell, i.e. 32 bits long
+1. all registers are 32-bit, being usable for either 32-bit integer (signed and unsigned) or 32-bit IEEE floating point numbers (binary32), or for pointers.
+2. pointers are 32-bit, that is, there are 2^32 = 4 billion addresses
+3. data cells are 32-bit, that is, behind each address lie 4 bytes, so that the whole address space represents 4bytesx4billion= 16 GB.
+4. all current instructions are a single cell, i.e. 32 bits long
 
 There are 255 general-purpose registers with ids 0 to 254, and the program counter (PC) with id 255. This means any register is represented by a single byte.
 
@@ -15,8 +15,8 @@ There are also a number of flags, that are usable by special instructions; they 
 
 The representation of instructions in binary always has one of two forms:
 
-a)   opcode | Rn | imm
-b)   opcode | Rn |  Rm | Rl
+1. opcode | Rn | imm
+2. opcode | Rn |  Rm | Rl
 
 opcodes are 8-bit, registers (Rn, Rm, Rl) also 8-bit, immediate values (imm) 16-bit. Not all opcodes are currently used, some are reserved for future use, including possibly multi-cell instructions that could have a different structure. However, the first 8 bits will always be used to represent the op code. In this representation, the first bit is the most significand (i.e. opcodes use the bits with values 2^31 to 2^28).
 
