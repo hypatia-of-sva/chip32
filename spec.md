@@ -619,9 +619,9 @@ The details on how these handlers are implemented will be provided in the corres
 
 A number of system status information can also be read from mapped memory, namely from addresses 0xFFFF0300-0xFFFF03FF. The following are currently defined, the rest are reserved for future use:
 
-0xFFFF0300: uptime of the program in nanoseconds
-0xFFFF0301: current time, with seconds in the lowest 8 bit, minutes in the next 8 bits, hours in the next 8 bits and a time zone code in the higest 8 bits, with the most significant bit signifying DST.
-0xFFFF0302: current date, with days in lowest 8 bits, months in the next 8 bits, and the year in the highest 16 bits, stored as a signed number for BC years, in case the system is used by an active time traveller.
-0xFFFF0303: current locale, with the lower 16 bits representing language, the next 8 bits country, and the highest 8 bits for currency
-0xFFFF0304: an estimate of the current network connectivity in bit/second
+- 0xFFFF0300: uptime of the program in nanoseconds
+- 0xFFFF0301: current time, with seconds in the lowest 8 bit, minutes in the next 8 bits, hours in the next 8 bits and a time zone code in the higest 8 bits, with the most significant bit signifying DST.
+- 0xFFFF0302: current date, with days in lowest 8 bits, months in the next 8 bits, and the year in the highest 16 bits, stored as a signed number for BC years, in case the system is used by an active time traveller.
+- 0xFFFF0303: current locale, with the lower 16 bits representing language, the next 8 bits country, and the highest 8 bits for currency
+- 0xFFFF0304: an estimate of the current network connectivity in bit/second
 
