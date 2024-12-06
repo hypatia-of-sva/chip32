@@ -599,7 +599,13 @@ The addresses 0xFFFF0002 to 0xFFFF00FF are reserved for future use.
 
 ### b) CPU-side interrupts.
 
-There are a number of interrupts that the CPU might call
+There are a number of interrupts that the CPU might call when something happens. These are not user-callable by the INT instruction, and instead are only called by the CPU itself. These are the following:
 
+- Trap handler for any of the flags (therefore currently at least 9)
+- key, joystick and mouse input
+- incoming package from network
+- sound input (microphone)
+- vertex and fragment shader
 
+For each of these interrupts, we can set a handler, by setting the mempory cels at addresses 0xFFFF0100 to 0xFFFF01FF. If a specific interrupt ought to not be handled, the cell can be set to 0, the null pointer. For all handlers, the code starts from the written address and must end at a LDLIZ R55, 0xFFFF. PC can't be written to directly in interrupt routine otherwise, and the BEZ instruction must only have immediate offsets that don't exit that range. All handlers except shaders are directly executed on the event. However, since shader code is not executed on the CPU, it must be compiled first. In order to aid that, there are the special addresss 0xFFFF0200-0xFFFF027F for vertex and 0xFFFF0280-0xFFFF02FF to keep 128 vertex resp. fragment shaders on hold.
  
