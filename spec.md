@@ -607,5 +607,21 @@ There are a number of interrupts that the CPU might call when something happens.
 - sound input (microphone)
 - vertex and fragment shader
 
-For each of these interrupts, we can set a handler, by setting the mempory cels at addresses 0xFFFF0100 to 0xFFFF01FF. If a specific interrupt ought to not be handled, the cell can be set to 0, the null pointer. For all handlers, the code starts from the written address and must end at a LDLIZ R55, 0xFFFF. PC can't be written to directly in interrupt routine otherwise, and the BEZ instruction must only have immediate offsets that don't exit that range. All handlers except shaders are directly executed on the event. However, since shader code is not executed on the CPU, it must be compiled first. In order to aid that, there are the special addresss 0xFFFF0200-0xFFFF027F for vertex and 0xFFFF0280-0xFFFF02FF to keep 128 vertex resp. fragment shaders on hold.
- 
+For each of these interrupts, we can set a handler, by setting the mempory cels at addresses 0xFFFF0100 to 0xFFFF01FF. If a specific interrupt ought to not be handled, the cell can be set to 0, the null pointer. For all handlers, the code starts from the written address and must end at a LDLIZ R55, 0xFFFF. PC can't be written to directly in interrupt routine otherwise, and the BEZ instruction must only have immediate offsets that don't exit that range. All handlers except shaders are directly executed on the event. However, since shader code is not executed on the CPU, it must be compiled first. In order to aid that, there are the special addresss 0xFFFF0200-0xFFFF027F and 0xFFFF0280-0xFFFF02FF to keep 128 vertex resp. fragment shaders on hold.
+
+When setting a handler like this, the CPU locks the associated memory, making a write to it an illegal instruction. Also, in the case of shaders, the write to the shader interrupt pointer or to one of the on-hold positions may take an indeterminate amount of time.
+
+These handlers take in their input in registers. Shaders cannot use main memory, others can and should. If they have an output, it must be put in registers also.
+
+The details on how these handlers are implemented will be provided in the corresponding descriptions below.
+
+### c) System status information
+
+A number of system status information can also be read from mapped memory, namely from addresses 0xFFFF0300-0xFFFF03FF. The following are currently defined, the rest are reserved for future use:
+
+0xFFFF0300: uptime of the program in nanoseconds
+0xFFFF0301: current time, with seconds in the lowest 8 bit, minutes in the next 8 bits, hours in the next 8 bits and a time zone code in the higest 8 bits, with the most significant bit signifying DST.
+0xFFFF0302: current date, with days in lowest 8 bits, months in the next 8 bits, and the year in the highest 16 bits, stored as a signed number for BC years, in case the system is used by an active time traveller.
+0xFFFF0303: current locale, with the lower 16 bits representing language, the next 8 bits country, and the highest 8 bits for currency
+0xFFFF0304: an estimate of the current network connectivity in bit/second
+
