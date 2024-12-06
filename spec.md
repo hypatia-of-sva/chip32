@@ -56,7 +56,28 @@ LDUI Rn, imm
  
 This sets the upper 16 bits of Rn to the immediate value, interpreted as a 16-bit unsigned integer.
 
-#### op codes 5 to 15 are reserved for future use.
+#### Load lower from immediate and zero (op = 5)
+LDLIZ Rn, imm
+
+	Rn = imm;
+
+This sets the lower 16 bits of Rn to the immediate value, interpreted as a 16-bit unsigned integer, and zeroes the upper bits.
+
+#### Load lower immediate and sign extend (op = 6)
+LDLISE Rn, imm
+
+	Rn = se(imm);
+
+This sets Rn to the sign extended value of the immediate, interpreted as a 16-bit signed integer, as defined in a later section.
+
+#### Load lower immediate from floating point (op = 7)
+LDLIF Rn, imm
+
+	Rn = ex(imm);
+
+This sets Rn to the expanded version of the immediate, interpreted as a 16-bit floating point number (half-float), as defined in a later section.
+
+#### op codes 8 to 15 are reserved for future use.
 
 ### 2. Integer arithmetic
 
@@ -309,7 +330,18 @@ Works exactly like
 would, including all necessary flag changes.
 
 
-#### op codes 54 to 79 are reserved for future use.
+The following instruction is a mixture of these two types of instructions:
+
+#### Split integer register (op = 54)
+SPLIT Rn, Rm, Rl
+
+	Rm = se(Rn & 0xFFFF);
+ 	Rl = se((Rn & 0xFFFF0000) >> 16);
+
+Takes apart a whole register into two parts, which are then sign-extended and stored into seperate registers.
+
+
+#### op codes 55 to 79 are reserved for future use.
 
 
 ### 3. Floating-point arithmetic
@@ -493,8 +525,18 @@ Works exactly like
 would, including all necessary flag changes.
 
 
+The following instruction is a mixture of these two types of instructions:
 
-#### op codes 107 to 120 are reserved for future use.
+#### Splt floating-point register (op = 107)
+FSPLIT Rn, Rm, Rl
+
+	Rm = ex(Rn & 0xFFFF);
+ 	Rl = ex((Rn & 0xFFFF0000) >> 16);
+
+Takes apart a whole register into two parts, which are then interpreted as 16-bit floats, extended to 32-bit floats, and stored into seperate registers.
+
+
+#### op codes 108 to 120 are reserved for future use.
 
 
 
@@ -518,7 +560,7 @@ Invokes the interrupt with the number of the value in Rn, with some immediate va
 
 ### Conclusion
 
-There are in total 71 of 256 opcodes in use. The other 185, that is 5-15, 54-79, 105-120 and 123-255, are reserved for data transfer, integer, floating point and miscelaneous instructions respectively, and set the illlegal instruction flag in its current use. If activated, they also call an illegal instruction trap handler. If not, they will act as nops. However, for intentional nops there are legal instructions, such as CPSWP Rn, Rn, Rn or ADDI Rn, #0, that should be used instead, as the behavior of any program using illegal instructions cannot be guaranteed in case future versions take use of the now reserved opcodes.
+There are in total 76 of 256 opcodes in use. The other 180, that is 8-15, 55-79, 108-120 and 123-255, are reserved for data transfer, integer, floating point and miscelaneous instructions respectively, and set the illlegal instruction flag in its current use. If activated, they also call an illegal instruction trap handler. If not, they will act as nops. However, for intentional nops there are legal instructions, such as CPSWP Rn, Rn, Rn or ADDI Rn, #0, that should be used instead, as the behavior of any program using illegal instructions cannot be guaranteed in case future versions take use of the now reserved opcodes.
 
 
 
@@ -527,11 +569,37 @@ There are in total 71 of 256 opcodes in use. The other 185, that is 5-15, 54-79,
 
 ## Memory-mapped utilities
 
-### a) CPU internal-flags and low level interrupts
+### a) CPU internal-flags.
 
 There are a number of internal flags and settings accessible to the user. Instructions can set the following flags:
-	- carry
-	- borrow
-	- overflow
-	- underflow
-	- divide by zero
+
+- carry
+- borrow
+- overflow
+- underflow
+- divide by zero
+- floating-point error (invalid operation)
+- floating-point inexactness (in last operation)
+- illegal instruction
+- termination (if jumped to addresses beginning with 0xFFFF)
+
+The IEEE divide-by-zero, overflow and underflow are mapped to the corresponding flags, as well as other instructions (also integer instructions). Carry and borrow also always set the overflow flag.
+
+The flags are stored, in the order from least to highest significant bit, at the address 0xFFFF0000. Reading this address will return the flags, writing to it is an illegal instruction and raises the illegal instruction flag.
+
+The current floating-point rounding mode is stored in the least significant two bits of 0xFFFF0001 and is one of the following:
+- 0: round to zero
+- 1: round towards positive infinity
+- 2: round towards negative infinity
+- 3: round to nearest (tie is not clearly defined)
+It can be read, and one of the allowed values can be written to. If any except the least significant two bits are changed, writing to it is an illegal instruction and raises the illegal instruction error. It will change the rounding for floating-point instructions as defined in IEEE.
+
+The addresses 0xFFFF0002 to 0xFFFF00FF are reserved for future use.
+
+
+### b) CPU-side interrupts.
+
+There are a number of interrupts that the CPU might call
+
+
+ 
