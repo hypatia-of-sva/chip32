@@ -573,39 +573,41 @@ There are in total 76 of 256 opcodes in use. The other 180, that is 8-15, 55-79,
 
 There are a number of internal flags and settings accessible to the user. Instructions can set the following flags:
 
-- carry
-- borrow
-- overflow
-- underflow
-- divide by zero
-- floating-point error (invalid operation)
-- floating-point inexactness (in last operation)
-- illegal instruction
-- termination (if jumped to addresses beginning with 0xFFFF)
+1. carry
+2. borrow
+3. overflow
+4. underflow
+5. divide by zero
+6. floating-point error (invalid operation)
+7. floating-point inexactness (in last operation)
+8. illegal instruction
+9. termination (if jumped to addresses beginning with 0xFFFF)
 
 The IEEE divide-by-zero, overflow and underflow are mapped to the corresponding flags, as well as other instructions (also integer instructions). Carry and borrow also always set the overflow flag.
 
-The flags are stored, in the order from least to highest significant bit, at the address 0xFFFF0000. Reading this address will return the flags, writing to it is an illegal instruction and raises the illegal instruction flag.
+The flags are stored, in the order from least to highest significant bit, at the address 0xFFFF0000, so currently using bits from position 1 to 2^8. Reading this address will return the flags, writing to it is an illegal instruction and raises the illegal instruction flag.
 
-The current floating-point rounding mode is stored in the least significant two bits of 0xFFFF0001 and is one of the following:
+For each flag, it can be set whether or not the trap handler should be called when it gets set. This information is of the same layout as the flags and stored at the address 0xFFFF0001. It can be read, and it can be written to, as long as only used flag bits are set to 1. If any other bits are set to 1, writing to it is an illegal instruction and raises the illegal instruction error.
+
+The current floating-point rounding mode is stored in the least significant two bits of 0xFFFF0002 and is one of the following:
 - 0: round to zero
 - 1: round towards positive infinity
 - 2: round towards negative infinity
 - 3: round to nearest (tie is not clearly defined)
 It can be read, and one of the allowed values can be written to. If any except the least significant two bits are changed, writing to it is an illegal instruction and raises the illegal instruction error. It will change the rounding for floating-point instructions as defined in IEEE.
 
-The addresses 0xFFFF0002 to 0xFFFF00FF are reserved for future use.
+The addresses 0xFFFF0003 to 0xFFFF00FF are reserved for future use.
 
 
 ### b) CPU-side interrupts.
 
 There are a number of interrupts that the CPU might call when something happens. These are not user-callable by the INT instruction, and instead are only called by the CPU itself. These are the following:
 
-- Trap handler for any of the flags (therefore currently at least 9)
-- key, joystick and mouse input
-- incoming package from network
-- sound input (microphone)
-- vertex and fragment shader
+- (at 0xFFFF0100) Trap handler for any of the flags that are on to monitor
+- (at 0xFFFF0101) key, joystick and mouse input
+- (at 0xFFFF0102) incoming package from network
+- (at 0xFFFF0103) sound input (microphone)
+- (at 0xFFFF0104 and 0xFFFF0105) vertex and fragment shader
 
 For each of these interrupts, we can set a handler, by setting the mempory cels at addresses 0xFFFF0100 to 0xFFFF01FF. If a specific interrupt ought to not be handled, the cell can be set to 0, the null pointer. For all handlers, the code starts from the written address and must end at a LDLIZ R55, 0xFFFF. PC can't be written to directly in interrupt routine otherwise, and the BEZ instruction must only have immediate offsets that don't exit that range. All handlers except shaders are directly executed on the event. However, since shader code is not executed on the CPU, it must be compiled first. In order to aid that, there are the special addresss 0xFFFF0200-0xFFFF027F and 0xFFFF0280-0xFFFF02FF to keep 128 vertex resp. fragment shaders on hold.
 
@@ -617,7 +619,7 @@ The details on how these handlers are implemented will be provided in the corres
 
 ### c) System status information
 
-A number of system status information can also be read from mapped memory, namely from addresses 0xFFFF0300-0xFFFF03FF. The following are currently defined, the rest are reserved for future use:
+A number of system status information can also be read from mapped memory, namely from addresses 0xFFFF0300-0xFFFF03FF. They are read-only, writing to it is an illegal instruction and raises the illegal instruction error. The following are currently defined, the rest are reserved for future use:
 
 - 0xFFFF0300: uptime of the program in nanoseconds
 - 0xFFFF0301: current time, with seconds in the lowest 8 bit, minutes in the next 8 bits, hours in the next 8 bits and a time zone code in the higest 8 bits, with the most significant bit signifying DST.
