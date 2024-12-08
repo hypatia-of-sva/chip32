@@ -45,14 +45,14 @@ This stores the old value of Rn to the cell pointed to by Rm, and loads the cont
 #### Load lower from immediate (op = 3)
 LDLI Rn, imm
 
-	Rn &= 0xFF00; Rn |= imm;
+	Rn &= 0xFFFF0000; Rn |= imm;
  
 This sets the lower 16 bits of Rn to the immediate value, interpreted as a 16-bit unsigned integer.
 
 #### Load upper from immediate (op = 4)
 LDUI Rn, imm
 
-	Rn &= 0x00FF; Rn |= (imm << 16);
+	Rn &= 0x0000FFFF; Rn |= (imm << 16);
  
 This sets the upper 16 bits of Rn to the immediate value, interpreted as a 16-bit unsigned integer.
 
