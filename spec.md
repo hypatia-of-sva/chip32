@@ -77,7 +77,31 @@ LDLIF Rn, imm
 
 This sets Rn to the expanded version of the immediate, interpreted as a 16-bit floating point number (half-float), as defined in a later section.
 
-#### op codes 8 to 15 are reserved for future use.
+#### Load from immediate offset (op = 8)
+LDFIO Rn, imm
+
+ 	Rn = (Rn + se(imm))*
+
+Loads the value at the cell which's address is stored in a register with an immediate offset into that same register, overriding the address. The immediate is sign-extended, which allows for negative offsets; the addition wraps around 2^32 if the original address is high (so starting with 0xFFFF8001).
+
+#### Load from immediate low address (op = 9)
+LDILA
+
+	Rn = (imm)*
+
+Loads the value at a cell which's address is a 16-bit unsigned immediate into a register. Can load from addresses 0x00000000 - 0x0000FFFF.
+
+
+#### Store to immediate low address (op = 10)
+STILA
+
+	(imm)* = Rn
+
+Stores the value in a register into a cell which's address is a 16-bit unsigned immediate. Can store into addresses 0x00000000 - 0x0000FFFF.
+
+
+
+#### op codes 11 to 15 are reserved for future use.
 
 ### 2. Integer arithmetic
 
@@ -560,7 +584,7 @@ Invokes the interrupt with the number of the value in Rn, with some immediate va
 
 ### Conclusion
 
-There are in total 76 of 256 opcodes in use. The other 180, that is 8-15, 55-79, 108-120 and 123-255, are reserved for data transfer, integer, floating point and miscelaneous instructions respectively, and set the illlegal instruction flag in its current use. If activated, they also call an illegal instruction trap handler. If not, they will act as nops. However, for intentional nops there are legal instructions, such as CPSWP Rn, Rn, Rn or ADDI Rn, #0, that should be used instead, as the behavior of any program using illegal instructions cannot be guaranteed in case future versions take use of the now reserved opcodes.
+There are in total 79 of 256 opcodes in use. The other 177, that is 11-15, 55-79, 108-120 and 123-255, are reserved for data transfer, integer, floating point and miscelaneous instructions respectively, and set the illlegal instruction flag in its current use. If activated, they also call an illegal instruction trap handler. If not, they will act as nops. However, for intentional nops there are legal instructions, such as CPSWP Rn, Rn, Rn or ADDI Rn, #0, that should be used instead, as the behavior of any program using illegal instructions cannot be guaranteed in case future versions take use of the now reserved opcodes.
 
 
 
