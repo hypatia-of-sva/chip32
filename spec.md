@@ -85,7 +85,7 @@ LDFIO Rn, imm
 Loads the value at the cell which's address is stored in a register with an immediate offset into that same register, overriding the address. The immediate is sign-extended, which allows for negative offsets; the addition wraps around 2^32 if the original address is high (so starting with 0xFFFF8001).
 
 #### Load from immediate low address (op = 9)
-LDILA
+LDILA Rn, imm
 
 	Rn = (imm)*
 
@@ -93,7 +93,7 @@ Loads the value at a cell which's address is a 16-bit unsigned immediate into a 
 
 
 #### Store to immediate low address (op = 10)
-STILA
+STILA Rn, imm
 
 	(imm)* = Rn
 
