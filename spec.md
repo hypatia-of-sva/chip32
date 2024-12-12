@@ -40,7 +40,7 @@ LDST Rn, Rm, Rl:
  	if (Rm != 0) Rm* = Rn;
   	if(Rl != 0) Rn = x;
  
-This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after.
+This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after. Because of the null check, the null pointer flag cannot be set in this instruction, and the address 0x00000000 can not be read or written to regardless.
 
 #### Load lower from immediate (op = 3)
 LDLI Rn, imm
@@ -82,14 +82,14 @@ LDFIO Rn, imm
 
  	Rn = (Rn + se(imm))*
 
-Loads the value at the cell which's address is stored in a register with an immediate offset into that same register, overriding the address. The immediate is sign-extended, which allows for negative offsets; the addition wraps around 2^32 if the original address is high (so starting with 0xFFFF8001).
+Loads the value at the cell which's address is stored in a register with an immediate offset into that same register, overriding the address. The immediate is sign-extended, which allows for negative offsets; the addition wraps around 2^32 if the original address is high (so starting with 0xFFFF8001). If the address becomes 0x00000000, the register remains unchanged and the null pointer flag is set instead.
 
 #### Load from immediate low address (op = 9)
 LDILA Rn, imm
 
 	Rn = (imm)*
 
-Loads the value at a cell which's address is a 16-bit unsigned immediate into a register. Can load from addresses 0x00000000 - 0x0000FFFF.
+Loads the value at a cell which's address is a 16-bit unsigned immediate into a register, overriding the old value. Can load from addresses 0x00000001 - 0x0000FFFF. Loading from 0x00000000 sets the null pointer flag instead, and the register remains unchanged.
 
 
 #### Store to immediate low address (op = 10)
@@ -97,7 +97,7 @@ STILA Rn, imm
 
 	(imm)* = Rn
 
-Stores the value in a register into a cell which's address is a 16-bit unsigned immediate. Can store into addresses 0x00000000 - 0x0000FFFF.
+Stores the value in a register into a cell which's address is a 16-bit unsigned immediate. Can store into addresses 0x00000001 - 0x0000FFFF. Loading from 0x00000000 sets the null pointer flag instead.
 
 
 
@@ -606,6 +606,7 @@ There are a number of internal flags and settings accessible to the user. Instru
 7. floating-point inexactness (in last operation)
 8. illegal instruction
 9. termination (if jumped to addresses beginning with 0xFFFF)
+10. null pointer access (only set for lower pointer and offset access, not LDST).
 
 The IEEE divide-by-zero, overflow and underflow are mapped to the corresponding flags, as well as other instructions (also integer instructions). Carry and borrow also always set the overflow flag.
 
