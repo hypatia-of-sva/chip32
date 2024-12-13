@@ -99,9 +99,15 @@ STILA Rn, imm
 
 Stores the value in a register into a cell which's address is a 16-bit unsigned immediate. Can store into addresses 0x00000001 - 0x0000FFFF. Loading from 0x00000000 sets the null pointer flag instead.
 
+#### Copy data ranges (op = 11)
+CDR Rn, Rm, Rl
+
+	memmove(Rn, Rm, Rl);
+
+Copies the cells from Rm to Rm+Rl to the cells Rn to Rn+Rl, as long as these are writable and the sum doesn't wrap around 2^32. If either of these happens, no memory is changed and the illegal instruction flag is set instead.
 
 
-#### op codes 11 to 15 are reserved for future use.
+#### op codes 12 to 15 are reserved for future use.
 
 ### 2. Integer arithmetic
 
@@ -584,7 +590,7 @@ Invokes the interrupt with the number of the value in Rn, with some immediate va
 
 ### Conclusion
 
-There are in total 79 of 256 opcodes in use. The other 177, that is 11-15, 55-79, 108-120 and 123-255, are reserved for data transfer, integer, floating point and miscelaneous instructions respectively, and set the illlegal instruction flag in its current use. If activated, they also call an illegal instruction trap handler. If not, they will act as nops. However, for intentional nops there are legal instructions, such as CPSWP Rn, Rn, Rn or ADDI Rn, #0, that should be used instead, as the behavior of any program using illegal instructions cannot be guaranteed in case future versions take use of the now reserved opcodes.
+There are in total 80 of 256 opcodes in use. The other 176, that is 12-15, 55-79, 108-120 and 123-255, are reserved for data transfer, integer, floating point and miscelaneous instructions respectively, and set the illlegal instruction flag in its current use. If activated, they also call an illegal instruction trap handler. If not, they will act as nops. However, for intentional nops there are legal instructions, such as CPSWP Rn, Rn, Rn or ADDI Rn, #0, that should be used instead, as the behavior of any program using illegal instructions cannot be guaranteed in case future versions take use of the now reserved opcodes.
 
 
 
