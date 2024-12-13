@@ -40,7 +40,7 @@ LDST Rn, Rm, Rl:
  	if (Rm != 0) Rm* = Rn;
   	if(Rl != 0) Rn = x;
  
-This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after. Because of the null check, the null pointer flag cannot be set in this instruction, and the address 0x00000000 can not be read or written to regardless.
+This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after. Because of the null check, the null pointer flag cannot be set in this instruction, and the address 0x00000000 can not be read or written to regardless. Note: this instruction is interpreted differently in shader code.
 
 #### Load lower from immediate (op = 3)
 LDLI Rn, imm
@@ -638,7 +638,7 @@ For each of these interrupts, we can set a handler, by setting the mempory cels 
 
 When setting a handler like this, the CPU locks the associated memory, making a write to it an illegal instruction. Also, in the case of shaders, the write to the shader interrupt pointer or to one of the on-hold positions may take an indeterminate amount of time.
 
-These handlers take in their input in registers. Shaders cannot use main memory, others can and should. If they have an output, it must be put in registers also.
+These handlers take in their input in registers. Shaders cannot use main memory (although some instructions that normally load main memory can be used to access special portions of shader memory; see belowfor a detailled explanations), others can and should. If they have an output, it must be put in registers also.
 
 The details on how these handlers are implemented will be provided in the corresponding descriptions below.
 
@@ -661,3 +661,34 @@ Parts of the internals of the CPU allow memory mapping that exceed the magic add
 - Finally, for graphics, we need uniforms for the shader code. The number of uniforms that should be used is stored in 0xFFFF0580. The uniforms are stored at the addresses 0xFFFF0581-0xFFFF05FF. These will be loaded into the first registers of R128-R254, according to the number of used registers, i.e. if 0xFFFF0580 is set to 10, then the values of 0xFFFF0581-0xFFFF0591 is loaded into R128-R138 for each call to a vertex or fragment shader. (In the implementation, this might happen through the usage of GPU memory such as by calling a glUniform function.)
 - For sound, the only thing external are the current sound buffers. There are 128 of them, and they are stored, just like vertex buffers, as a pair of address and size, between 0xFFFF0600/01-0xFFFF06FE/FF. The data stored at the buffer is stored in CD format, i.e 44.1 kHz 16bit PCM stereo, with one cell representing both channels for one sound point, and the sound being stored in bit decending order, with the left channel in the higher and the right channel in the lower 16 bits of the cell.
 - 
+
+
+## Shader code mapping
+
+### Input and Output variables
+
+
+### Uniforms
+
+### Texture access
+
+All 64 textures can be used in both vertex and fragment shader. This is encoded as a "load" instruction, as in the following:
+
+Say we want to load from texture 52 at a position with indices stored in R9 and R10 into R92. Then we have to write:
+
+	LDLIZ R92, 52
+ 	LDST R92, R9, R10
+
+This clearly does _not_ perform a load/store; specifically, it does not store anything. It merely uses the opcode for LDST to encode texture access.
+
+<!--
+### Access to neighbouring fragments in fragment shaders
+
+Access to neighbouring fragments (e.g. for D(f)DX/D(f)DY) is performed via the LDILA instruction, as
+
+	LDILA R5, 0x0012
+
+ loads the value of the R0x12 = R18 register in the fragment one to the left into R5. This works for 0x0000-0x00FE. Similarly, 0x0100-0x01FE is for one to the right, 0x0200-0x02FE is for one above, 0x0300-0x03FE is for one below.
+
+-->
+
