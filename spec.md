@@ -584,8 +584,15 @@ FSPLIT Rn, Rm, Rl
 
 Takes apart a whole register into two parts, which are then interpreted as 16-bit floats, extended to 32-bit floats, and stored into seperate registers.
 
+#### Fuse floating-point registers (op = 108)
+FFUSE Rn, Rm, Rl
 
-#### op codes 108 to 120 are reserved for future use.
+ Rn = (rddwn(Rm)) | (rddwn(Rl) << 16)
+
+Rounds down the values of Rm and Rl to 16 bit floating point precision (rddwn is the opposite function to ex, and is performed by finding the closest, by value, possible representation of the real number that would exactly be represented by the 32-bit floating point used as an argument), and stores them in the upper and lowe parts of Rn. This is the inverse operation of FSPLIT, as long as the values of Rm and Rl can exactly be represented as a 16-bit float.
+
+
+#### op codes 109 to 120 are reserved for future use.
 
 
 
@@ -609,7 +616,7 @@ Invokes the interrupt with the number of the value in Rn, with some immediate va
 
 ### Conclusion
 
-There are in total 82 of 256 opcodes in use. The other 176, that is 13-15, 56-79, 108-120 and 123-255, are reserved for data transfer, integer, floating point and miscelaneous instructions respectively, and set the illegal instruction flag in its current use. If activated, they also call an illegal instruction trap handler. If not, they will act as nops. However, for intentional nops there are legal instructions, such as CPSWP Rn, Rn, Rn or ADDI Rn, #0, that should be used instead, as the behavior of any program using illegal instructions cannot be guaranteed in case future versions take use of the now reserved opcodes.
+There are in total 82 of 256 opcodes in use. The other 176, that is 13-15, 56-79, 109-120 and 123-255, are reserved for data transfer, integer, floating point and miscelaneous instructions respectively, and set the illegal instruction flag in its current use. If activated, they also call an illegal instruction trap handler. If not, they will act as nops. However, for intentional nops there are legal instructions, such as CPSWP Rn, Rn, Rn or ADDI Rn, #0, that should be used instead, as the behavior of any program using illegal instructions cannot be guaranteed in case future versions take use of the now reserved opcodes.
 
 
 
