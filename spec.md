@@ -18,7 +18,7 @@ The representation of instructions in binary always has one of two forms:
 1. opcode | Rn | imm
 2. opcode | Rn |  Rm | Rl
 
-opcodes are 8-bit, registers (Rn, Rm, Rl) also 8-bit, immediate values (imm) 16-bit. Not all opcodes are currently used, some are reserved for future use, including possibly multi-cell instructions that could have a different structure. However, the first 8 bits will always be used to represent the op code. In this representation, the first bit is the most significand (i.e. opcodes use the bits with values 2^31 to 2^28).
+opcodes are 8-bit, registers (Rn, Rm, Rl) also 8-bit, immediate values (imm) 16-bit. Not all opcodes are currently used, some are reserved for future use, including possibly multi-cell instructions that could have a different structure. However, the first 8 bits will always be used to represent the op code. In this representation, the first bit is the most significant (i.e. opcodes use the bits with values 2^31 to 2^28).
 
 The currently supported instructions are split in the following sections, each explained with a pseudo-micro-code segment and a written out explanation:
 
@@ -40,7 +40,7 @@ LDST Rn, Rm, Rl:
  	if (Rm != 0) Rm* = Rn;
   	if(Rl != 0) Rn = x;
  
-This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after. Because of the null check, the null pointer flag cannot be set in this instruction, and the address 0x00000000 can not be read or written to regardless. Note: this instruction is interpreted differently in shader code.
+This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after. Because of the null check, the null pointer flag cannot be set in this instruction, and the address 0x00000000 can not be read or written to regardless. Note: this instruction is interpreted differently in shader code. In normal code its main use in its full form is to jump to a subroutine and save the return address, with the use of Rn = R255 = PC.
 
 #### Load lower from immediate (op = 3)
 LDLI Rn, imm
