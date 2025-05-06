@@ -106,6 +106,19 @@ CDR Rn, Rm, Rl
 
 Copies the cells from Rm to Rm+Rl to the cells Rn to Rn+Rl, as long as these are writable and the sum doesn't wrap around 2^32. If either of these happens, no memory is changed and the illegal instruction flag is set instead.
 
+#### Load/Store a number of registers (op = 12)
+LDSTAR Rn, Rm, Rl
+
+ if(Rn != 0) {
+  k = Rn, x = Rm, y = Rl
+  for (i = 0; i < k; i++) {
+	   if (y != 0) tmp = (y+i)*;
+ 	  if (x != 0) (x+i)* = Rn;
+   	if (y != 0) Rn = tmp;
+	 }
+ }
+
+Loads and/or stores a number of registers, starting from R0, to/from memory. Works like LDST, but can transfer up to all 256 registers in one instruction. Fails if Rn has a value higher than 256 stored, and sets a specific internal flag. Rn == 0 does nothing.
 
 #### op codes 12 to 15 are reserved for future use.
 
@@ -613,6 +626,7 @@ There are a number of internal flags and settings accessible to the user. Instru
 8. illegal instruction
 9. termination (if jumped to addresses beginning with 0xFFFF)
 10. null pointer access (only set for lower pointer and offset access, not LDST).
+11. too high number for LDSTAR
 
 The IEEE divide-by-zero, overflow and underflow are mapped to the corresponding flags, as well as other instructions (also integer instructions). Carry and borrow also always set the overflow flag.
 
