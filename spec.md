@@ -343,12 +343,12 @@ EQI Rn, imm
 
 There is no NANDI, because that would be the same as ORI with a bit-inverted immediate, and no LNANDI becsuse the operation, depending if the immediate is 0 or not, would be equivalent to either LNAND Rm, Rm, Rm or to EQ Rm, Rm, Rm.
 
-Importantly, signedness of the operation does matter even though the immediate is always sign-extended. UGTI and SGTI act differently, because they treat the register as either signed or unsigned, and therefore, say if R5 has stored the value 0xFFFFF00, the operations
+Importantly, signedness of the operation does matter even though the immediate is always sign-extended. UGTI and SGTI act differently, because they treat the register as either signed or unsigned, and therefore, say if R5 has stored the value 0xFFFFFFFF, the operations
 
-	UGTI R5, #17
-	SGTI R5, #17
+	UGTI R5, #27
+	SGTI R5, #27
  
-have opposite results, because the first instruction interprets R5 as a large positive integer, thus writing 1 to R5, while the second reads it as a negative integer, thus writing 0 to R5.
+have opposite results, because the first instruction interprets R5 as a large positive integer, i.e. R5 > 27, thus writing 1 to R5, while the second reads it as a negative integer, i.e. R5 < 27, thus writing 0 to R5.
 
 Also we add the following two immediate instructions:
 
