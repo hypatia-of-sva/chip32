@@ -36,9 +36,9 @@ This copies the value of Rm to Rn while copying the old value of Rn to Rl. If l 
 #### Load/Store (op = 1)
 LDST Rn, Rm, Rl:
 
-	if (Rl != 0) x = Rl*;
- 	if (Rm != 0) Rm* = Rn;
-  	if(Rl != 0) Rn = x;
+	  if (Rl != 0) x = Rl*;
+ 	 if (Rm != 0) Rm* = Rn;
+  	if (Rl != 0) Rn = x;
  
 This stores the old value of Rn to the cell pointed to by Rm, and loads the content of the cell pointed to by Rl. Null pointers are used to note that no saving or loading shall take place. If both are non-null, this is effectively a swap between register and memory cell. l == m is permitted, and it is guaranteed that the value loaded is the old value of the cell which is only overwritten after. Because of the null check, the null pointer flag cannot be set in this instruction, and the address 0x00000000 can not be read or written to regardless. Note: this instruction is interpreted differently in shader code. In normal code its main use in its full form is to jump to a subroutine and save the return address, with the use of Rn = R255 = PC.
 
@@ -78,7 +78,7 @@ LDLIF Rn, imm
 This sets Rn to the expanded version of the immediate, interpreted as a 16-bit floating point number (half-float), as defined in a later section.
 
 #### Load from immediate offset (op = 8)
-LDFIO Rn, imm
+LDIO Rn, imm
 
  	Rn = (Rn + se(imm))*
 
