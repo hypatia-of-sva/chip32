@@ -684,6 +684,7 @@ A number of system status information can also be read from mapped memory, namel
 - 0xFFFF0302: current date, with days in lowest 8 bits, months in the next 8 bits, and the year in the highest 16 bits, stored as a signed number for BC years, in case the system is used by an active time traveller.
 - 0xFFFF0303: current locale, with the lower 16 bits representing language, the next 8 bits country, and the highest 8 bits for currency
 - 0xFFFF0304: an estimate of the current network connectivity in bit/second
+- 0xFFFF0305: the last available address for the use of the internal memory. pages 0x00000001-0x0000FFFF and 0xFFFF0000-0xFFFFFFFF are always available; if other space is available, it sits between 0x00010000 and the address at this number (inclusive); if this number is exactly 0x0000FFFF, no more space is available. 
 
 ### d) data access locations
 
