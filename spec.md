@@ -608,9 +608,9 @@ Adds an offset to the program counter, if a register is zero. This offset is int
 #### Interrupt invocation (op = 122)
 INT Rn, imm
 
-	(interrupt_table[Rn])(imm)
+	(interrupt_table[n])(imm)
  
-Invokes the interrupt with the number of the value in Rn, with some immediate value as payload. How this payload is to be interpreted - whether as numbers, addresses to certain pages, or as two register numbers, or in other ways - is up to the interrupt handler / built-in functionality, and documented there. These interrupts can be hardware functionality (like making a controller rumble), a chip32 system functionality (like saving savegames) or a user supplied interrupt handler (like shader code for draw calls). The instruction can take an indeterminate amount of time and may or may not return immediately while the task is completed asynchronously in the background (for example, saving should happen immediately and be blocking, but draw calls, as they are potentially executed on an external GPU, will be executed asynchronously).
+Invokes the interrupt with the number n, with some immediate value as payload. IMPORTANT: The Register Rn is not read or touched necessarily, and is only used as the number n from 0 to 255 (similar to opcodes). How the payload is to be interpreted - whether as numbers, addresses to certain pages, or as two register numbers, or in other ways - is up to the interrupt handler / built-in functionality, and documented there. These interrupts can be hardware functionality (like making a controller rumble), a chip32 system functionality (like saving savegames) or a user supplied interrupt handler (like shader code for draw calls). The instruction can take an indeterminate amount of time and may or may not return immediately while the task is completed asynchronously in the background (for example, saving should happen immediately and be blocking, but draw calls, as they are potentially executed on an external GPU, will be executed asynchronously).
 
 #### op codes 123 to 255 are reserved for future use
 
@@ -620,7 +620,21 @@ There are in total 82 of 256 opcodes in use. The other 176, that is 13-15, 56-79
 
 
 
+## Interrupts
 
+### 1. System interrupts
+
+#### int nrs 0 to 31 reserved for future use
+
+### 2. Graphics Interrupts
+
+#### Draw call (int nr = 16)
+
+The vertex and fragment shader set globally is used, with provided vertex and index buffers with indices provided in the immediate values: since there are 64 of each, we need 6 bits for both, with 12 bits total of the 16 bit immediate being used, of the format (high to low bit):
+
+	vvvvvviiiiiiuuuu
+
+for v and i being vertex and index buffer numbers, and the `u` bits remaining unused / reserved for future use.
 
 
 ## Memory-mapped utilities
