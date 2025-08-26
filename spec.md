@@ -693,12 +693,12 @@ The details on how these handlers are implemented will be provided in the corres
 
 A number of system status information can also be read from mapped memory, namely from addresses 0xFFFF0300-0xFFFF03FF. They are read-only, writing to it is an illegal instruction and raises the illegal instruction error. The following are currently defined, the rest are reserved for future use:
 
-- 0xFFFF0300: uptime of the program in nanoseconds
-- 0xFFFF0301: current time, with seconds in the lowest 8 bit, minutes in the next 8 bits, hours in the next 8 bits and a time zone code in the higest 8 bits, with the most significant bit signifying DST.
-- 0xFFFF0302: current date, with days in lowest 8 bits, months in the next 8 bits, and the year in the highest 16 bits, stored as a signed number for BC years, in case the system is used by an active time traveller.
-- 0xFFFF0303: current locale, with the lower 16 bits representing language, the next 8 bits country, and the highest 8 bits for currency
-- 0xFFFF0304: an estimate of the current network connectivity in bit/second
-- 0xFFFF0305: the last available address for the use of the internal memory. pages 0x00000001-0x0000FFFF and 0xFFFF0000-0xFFFFFFFF are always available; if other space is available, it sits between 0x00010000 and the address at this number (inclusive); if this number is exactly 0x0000FFFF, no more space is available. Using not available addresses in load or store instructions counts as an invalid address error, which triggers the null pointer flag. 
+- 0xFFFF0300 and 0xFFFF0301: uptime of the program in nanoseconds
+- 0xFFFF0302: current time, with seconds in the lowest 8 bit, minutes in the next 8 bits, hours in the next 8 bits and a time zone code in the higest 8 bits, with the most significant bit signifying DST. The time zone code, i.e. the lower 7 bits, are interpreted as a signed integer, i.e. -64 to +63, representing the number of 15 minute interval differences from UTC, i.e. from -16 to +15:45 hour differences, of which only -11:45 to +12:00 are used. The DST-bit only reflects _if_ DST is active; the number in the hours is already DST-corrected, and the information is only here for the purposed of comparing DST to non-DST timestamps, and thus making a difference between a timezone change due to date and due to changing the location in the settings menu.
+- 0xFFFF0303: current date, with days in lowest 8 bits, months in the next 8 bits, and the year in the highest 16 bits, stored as a signed number for BC years, in case the system is used by an active time traveller.
+- 0xFFFF0304: current locale, with the lower 16 bits representing language, the next 8 bits country, and the highest 8 bits for currency
+- 0xFFFF0305: an estimate of the current network connectivity in bit/second
+- 0xFFFF0306: the last available address for the use of the internal memory. pages 0x00000001-0x0000FFFF and 0xFFFF0000-0xFFFFFFFF are always available; if other space is available, it sits between 0x00010000 and the address at this number (inclusive); if this number is exactly 0x0000FFFF, no more space is available. Using not available addresses in load or store instructions counts as an invalid address error, which triggers the null pointer flag. 
 
 ### d) data access locations
 
