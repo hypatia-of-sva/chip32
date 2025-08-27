@@ -624,11 +624,15 @@ There are in total 82 of 256 opcodes in use. The other 176, that is 13-15, 56-79
 
 ### 1. System interrupts
 
-#### int nrs 0 to 31 reserved for future use
+#### Save savegame (int nr = 16)
+
+#### Load savegame (int nr = 17)
+
+#### int nrs 0 to 15 and 18 to 31 reserved for future use
 
 ### 2. Graphics Interrupts
 
-#### Draw call (int nr = 16)
+#### Draw call (int nr = 32)
 
 The vertex and fragment shader set globally is used, with provided vertex and index buffers with indices provided in the immediate values: since there are 64 of each, we need 6 bits for both, with 12 bits total of the 16 bit immediate being used, of the format (high to low bit):
 
@@ -636,10 +640,13 @@ The vertex and fragment shader set globally is used, with provided vertex and in
 
 for v and i being vertex and index buffer numbers, and the `u` bits remaining unused / reserved for future use.
 
+#### Switch Buffers (int nr = 33)
+
+#### Take a screenshot (int nr = 34)
 
 ## Memory-mapped utilities
 
-### a) CPU internal-flags.
+### a) CPU internal-flags and general settings.
 
 There are a number of internal flags and settings accessible to the user. Instructions can set the following flags:
 
@@ -666,9 +673,49 @@ The current floating-point rounding mode is stored in the least significant two 
 - 1: round towards positive infinity
 - 2: round towards negative infinity
 - 3: round to nearest (tie is not clearly defined)
+
 It can be read, and one of the allowed values can be written to. If any except the least significant two bits are changed, writing to it is an illegal instruction and raises the illegal instruction error. It will change the rounding for floating-point instructions as defined in IEEE.
 
-The addresses 0xFFFF0003 to 0xFFFF00FF are reserved for future use.
+In this bank, we also have a number of general flags and settings, most notably relating to graphics. These are:
+
+- 0xFFFF1000 - blend color as RGBA8
+- 0xFFFF1001 - blend factors (with bit 0 = least significant)
+  - bits 0-1 the rgb equation with values:
+    - 0 = Add
+    - 1 = Subtract
+    - 2 = Reverse subtract
+    - 3 reserved for future use
+  - bits 2-3 the alpha equation with the same values
+  - bits 4-7 the source rgb factor function, with values:
+    - 0 = Constant 0
+    - 1 = Constant 1
+    - 2 = the source color
+    - 3 = 1 - the source color
+    - 4 = the destination color
+    - 5 = 1 - the destination color
+    - 6 = the source alpha value
+    - 7 = 1 - the source alpha value
+    - 8 = the destination alpha value
+    - 9 = 1 - the destination alpha value
+    - 10 = the constant blend color 
+    - 11 = 1 - the constant blend color
+    - 12 = the constant blend color alpha value
+    - 13 = 1 - the constant blend color alpha value
+    - 14 = source alpha saturation mode
+    - 15 reserved for future use-
+  - bits 8-11 the source alpha factor function, with the same values
+  - bits 12-15 the destinatio rgb factor function, with the same values except 14 is also reserved for future use
+  - bits 16-19 the destinatio alpha factor function, with the same values except 14 is also reserved for future use
+  - bits 20-31 reserved for future use.
+- 0xFFFF10FF - Flags as a bitfield (with bit 0 = least significant):
+  - bit 0: enable color blending
+
+Notable values that are not global constants in memory, for various reasons:
+- there is no global clear color; instead, it is a parameter to the interrupt to switch buffers
+- The Monitor mode is always 1080x1960px 60fps, and thus there is no setting for that or for the viewport size
+- The name of the program, as well as the thumbnail, is stored seperately to the code on an info file / in the header of the ROM file, and cannot be interacted with programmatically.
+
+The addresses 0xFFFF0003 to 0xFFFF000F and 0xFFFF2000 to 0xFFFF00FF are reserved for future use.
 
 
 ### b) CPU-side interrupts.
