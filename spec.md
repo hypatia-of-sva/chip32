@@ -678,8 +678,8 @@ It can be read, and one of the allowed values can be written to. If any except t
 
 In this bank, we also have a number of general flags and settings, most notably relating to graphics. These are:
 
-- 0xFFFF1000 - blend color as RGBA8
-- 0xFFFF1001 - blend factors (with bit 0 = least significant)
+- 0xFFFF0010 - blend color as RGBA8 little endian
+- 0xFFFF0011 - blend factors (with bit 0 = least significant)
   - bits 0-1 the rgb equation with values:
     - 0 = Add
     - 1 = Subtract
@@ -707,15 +707,70 @@ In this bank, we also have a number of general flags and settings, most notably 
   - bits 12-15 the destinatio rgb factor function, with the same values except 14 is also reserved for future use
   - bits 16-19 the destinatio alpha factor function, with the same values except 14 is also reserved for future use
   - bits 20-31 reserved for future use.
-- 0xFFFF10FF - Flags as a bitfield (with bit 0 = least significant):
+- 0xFFFF0012 - polygon offset fill factors, wth the scale factor in the lower 16 and the unit in the upper 16 bits, both as 16 bit float.
+- 0xFFFF0013 - depth test range, with the near plane in the lower 16 and the far plane in the upper 16 bits, both as 16 bit float.
+- 0xFFFF0014 - stencil clockwise face reference value
+- 0xFFFF0015 - stencil counter-clockwise face reference value
+- 0xFFFF0016 - stencil clockwise face comparison bit mask
+- 0xFFFF0017 - stencil counter-clockwise face comparison bit mask
+- 0xFFFF0018 - stencil clockwise face write bit mask
+- 0xFFFF0019 - stencil counter-clockwise face write bit mask
+- 0xFFFF001A - stencil and depth comparison factors (with bit 0 = least significant)
+  - bits 0-2: the depth comparison function, with values
+    - 0 = Never accept new value
+    - 1 = Accept if <  current value
+    - 2 = Accept if == current value
+    - 3 = Accept if <= current value
+    - 4 = Accept if >  current value
+    - 5 = Accept if != current value
+    - 6 = Accept if >= current value
+    - 7 = Always accept new value
+  - bits 3-5: stencil comparison function for clockwise faces, with the same values
+  - bits 6-8: stencil comparison function for counter-clockwise faces, with the same values
+  - bits 9-11: stencil-fail operation for clockwise faces, with values
+    - 0 = Keep current value
+    - 1 = Set it to 0
+    - 2 = Replace it with reference value
+    - 3 = Increment current value with clamping to max
+    - 4 = Increment current value with wrapping to 0
+    - 5 = Decrement current value with clamping to 0
+    - 6 = Decrement current value with wrapping to max
+    - 7 = Bit-Invert the current value
+  - bits 12-14: stencil depth-fail operation for clockwise faces, with the same values
+  - bits 15-17: stencil depth-pass operation for clockwise faces, with the same values
+  - bits 18-20: stencil-fail operation for counter-clockwise faces, with the same values
+  - bits 21-23: stencil depth-fail operation for counter-clockwise faces, with the same values
+  - bits 24-26: stencil depth-pass operation for counter-clockwise faces, with the same values
+  - bits 27-31 reserved for future use
+- 0xFFFF001B - scissor box origin coordinate, with the x coordinate in the lower 16 bits, and the y coordinate in the higher 16 bits, both as unsigned integer.
+- 0xFFFF001C - scissor box end point coordinate, with the x coordinate in the lower 16 bits, and the y coordinate in the higher 16 bits, both as unsigned integer.
+- 0xFFFF001D - coverage value as 32 bit float
+- 0xFFFF001E - line width as 32 bit float
+- 0xFFFF001F - Flags as a bitfield (with bit 0 = least significant):
   - bit 0: enable color blending
+  - bit 1: allow writing to red buffer
+  - bit 2: allow writing to green buffer
+  - bit 3: allow writing to blue buffer
+  - bit 4: allow writing to alpha buffer
+  - bit 5: allow writing to depth buffer
+  - bit 6: enable culling for clockwise faces
+  - bit 7: enable culling for counter-clockwise faces
+  - bit 8: enable polygon offset filling
+  - bit 9: enable depth testing
+  - bit 10: enable stencil testing
+  - bit 11: enable scissor box
+  - bit 12: enable sample coverage
+  - bit 13: convert alpha to coverage value
+  - bit 14: invert the coverage mask
+  - bit 15: enable dithering
 
 Notable values that are not global constants in memory, for various reasons:
 - there is no global clear color; instead, it is a parameter to the interrupt to switch buffers
+- Pixel storage or read data is always cell-aligned, i.e. by 4 bytes.
 - The Monitor mode is always 1080x1960px 60fps, and thus there is no setting for that or for the viewport size
 - The name of the program, as well as the thumbnail, is stored seperately to the code on an info file / in the header of the ROM file, and cannot be interacted with programmatically.
 
-The addresses 0xFFFF0003 to 0xFFFF000F and 0xFFFF2000 to 0xFFFF00FF are reserved for future use.
+The addresses 0xFFFF0003 to 0xFFFF000F and 0xFFFF0020 to 0xFFFF00FF are reserved for future use.
 
 
 ### b) CPU-side interrupts.
