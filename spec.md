@@ -2,7 +2,7 @@
 
 ## Overview
 
-Chip32 is a 32-bit Computer in the following senses:
+Chip32 is a 32-bit Computer in the following senses: 
 
 1. all registers are 32-bit, being usable for either 32-bit integer (signed and unsigned) or 32-bit IEEE floating point numbers (binary32), or for pointers.
 2. pointers are 32-bit, that is, there are 2^32 = 4 billion addresses
