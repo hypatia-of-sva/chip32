@@ -824,7 +824,7 @@ Parts of the internals of the CPU allow memory mapping that exceed the magic add
     - 1 = repeating
     - 2 = mirrored repeating
     - 3 reserved for future use
-  - bits 7-8 represents the x-direction wrapping mode, with values:
+  - bits 7-8 represents the y-direction wrapping mode, with values:
     - 0 = clamped to edge
     - 1 = repeating
     - 2 = mirrored repeating
