@@ -830,8 +830,8 @@ Parts of the internals of the CPU allow memory mapping that exceed the magic add
     - 2 = mirrored repeating
     - 3 reserved for future use
   - bits 9-11 reserved for future use
-  - bits 12-21 the height of the texture, must be between 1 and 1023 (i.e. not 0)
-  - bits 22-42 the width of the texture, must be between 1 and 1023 (i.e. not 0)
+  - bits 12-21 the height of the texture minus 1; i.e. the values are interpreted as 1 to 1024, not 0 to 1023
+  - bits 22-42 the width of the texture minus 1; i.e. the values are interpreted as 1 to 1024, not 0 to 1023
 There are 64 texture buffers available, stored in the pairs 0xFFFF0500/01 to 0xFFFF057E/7F. The same rules for pair changes as for vertex data apply.
 - Finally, for graphics, we need uniforms for the shader code. The number of uniforms that should be used is stored in 0xFFFF0580. The uniforms are stored at the addresses 0xFFFF0581-0xFFFF05FF. These will be loaded into the first registers of R128-R254, according to the number of used registers, i.e. if 0xFFFF0580 is set to 10, then the values of 0xFFFF0581-0xFFFF0591 is loaded into R128-R138 for each call to a vertex or fragment shader. (In the implementation, this might happen through the usage of GPU memory such as by calling a glUniform function.)
 - For sound, the only thing external are the current sound buffers. There are 128 of them, and they are stored, just like vertex buffers, as a pair of address and size, between 0xFFFF0600/01-0xFFFF06FE/FF. The data stored at the buffer is stored in CD format, i.e 44.1 kHz 16bit PCM stereo, with one cell representing both channels for one sound point, and the sound being stored in bit decending order, with the left channel in the higher and the right channel in the lower 16 bits of the cell.
