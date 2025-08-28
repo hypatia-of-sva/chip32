@@ -767,7 +767,7 @@ In this bank, we also have a number of general flags and settings, most notably 
 Notable values that are not global constants in memory, for various reasons:
 - there is no global clear color; instead, it is a parameter to the interrupt to switch buffers
 - Pixel storage or read data is always cell-aligned, i.e. by 4 bytes.
-- The Monitor mode is always 1080x1960px 60fps, and thus there is no setting for that or for the viewport size
+- The Monitor mode is always 1080x1920px 60fps, and thus there is no setting for that or for the viewport size
 - The name of the program, as well as the thumbnail, is stored seperately to the code on an info file / in the header of the ROM file, and cannot be interacted with programmatically.
 
 The addresses 0xFFFF0003 to 0xFFFF000F and 0xFFFF0020 to 0xFFFF00FF are reserved for future use.
@@ -807,7 +807,32 @@ A number of system status information can also be read from mapped memory, namel
 Parts of the internals of the CPU allow memory mapping that exceed the magic addresses and need to connect to other portions of memory. These include the following:
 
 - For graphics, we first have the vertex data. These include the following information: the pointer to the vertex buffer and its length, as well as the pointer to the index buffer and its length. Since multiple of these can be used in different combinations, and should be able to be preloaded, the mechanism is, that the addresses 0sFFFF0400-0xFFFF04FF can be used in pairs, i.e. 0xFFFF0400 would be a pointer to the buffer, and 0xFFFF0401 would be the length of the buffer in cells (i.e. bytes/4). The pairs from 0xFFFF0400/01 to 0xFFFF047E/7F are designated for vertex buffers, the pairs from 0xFFFF0480/81 to 0xFFFF04FE/FF are designated for index buffers. You have, in both cases, first to set the buffer pointer then the size to a value in consecutive LDST instructions; if you try to change one of them without the other, or the other way around, it is an illegal instruction.
-- Secondly, we need textures. For these, we need again a pair, the first again a pointer to a buffer, but the second a packed two-dimensional size, where the upper 16 bits of the cell indicate the height, the lower 16 bits the width of the texture, both in cells (which represent pixel data in 32-bit RGBA, stored in one cell per pixel). There are 64 texture buffers available, stored in the pairs 0xFFFF0500/01 to 0xFFFF057E/7F. The same rules for pair changes as for vertex data apply.
+- Secondly, we need textures. For these, we need again a pair, the first again a pointer to a buffer with the pixel data, stored in RGBA8 little endian, i.e. one cell per pixel, and with the second a packed information struct, including (with bit 0 = least significant):
+  - bit 0 is on if the texture is a cube-map; in this case, height and width need to be the same, the wrapping modes needs to be "clamped to edge", and the buffer needs to include six consecutive pictures, interpreted as: positive-x, negative-x, positive-y, negative-y, positive-z, negative-z, in that order.
+  - bit 1 represents the magnifying mode, with values:
+    - 0 = Nearest Element
+    - 1 = Linear average of four elements
+  - bits 2-4 represents the minifying mode, with values:
+    - 0 = Nearest element of original texture
+    - 1 = Linear average of four elements of original texture
+    - 2 = Nearest element of matching mipmap
+    - 3 = Linear average of four elements of matching mipmap
+    - 2 = Average of the nearest elements of the two closest mipmaps
+    - 3 = Average of the linear averages of four elements of the two closest mipmaps (with the average calculated in each mipmap first, then averaged between them)
+  - bits 5-6 represents the x-direction wrapping mode, with values:
+    - 0 = clamped to edge
+    - 1 = repeating
+    - 2 = mirrored repeating
+    - 3 reserved for future use
+  - bits 7-8 represents the x-direction wrapping mode, with values:
+    - 0 = clamped to edge
+    - 1 = repeating
+    - 2 = mirrored repeating
+    - 3 reserved for future use
+  - bits 9-11 reserved for future use
+  - bits 12-21 the height of the texture, must be between 1 and 1023 (i.e. not 0)
+  - bits 22-42 the width of the texture, must be between 1 and 1023 (i.e. not 0)
+There are 64 texture buffers available, stored in the pairs 0xFFFF0500/01 to 0xFFFF057E/7F. The same rules for pair changes as for vertex data apply.
 - Finally, for graphics, we need uniforms for the shader code. The number of uniforms that should be used is stored in 0xFFFF0580. The uniforms are stored at the addresses 0xFFFF0581-0xFFFF05FF. These will be loaded into the first registers of R128-R254, according to the number of used registers, i.e. if 0xFFFF0580 is set to 10, then the values of 0xFFFF0581-0xFFFF0591 is loaded into R128-R138 for each call to a vertex or fragment shader. (In the implementation, this might happen through the usage of GPU memory such as by calling a glUniform function.)
 - For sound, the only thing external are the current sound buffers. There are 128 of them, and they are stored, just like vertex buffers, as a pair of address and size, between 0xFFFF0600/01-0xFFFF06FE/FF. The data stored at the buffer is stored in CD format, i.e 44.1 kHz 16bit PCM stereo, with one cell representing both channels for one sound point, and the sound being stored in bit decending order, with the left channel in the higher and the right channel in the lower 16 bits of the cell.
 - 
